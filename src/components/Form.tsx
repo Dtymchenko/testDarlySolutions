@@ -6,55 +6,49 @@ import { IItems } from './interface';
 
 interface FormProps {
     items: IItems[],
-    setItems: any
+    setItems: (a: IItems[]) => void,
+    maxItems: number
 }
 
-export default function Form({items, setItems}:FormProps) {
+export default function Form({items, setItems, maxItems}: FormProps) {
 
     const [inputId, setInputId] = React.useState('')
     const [inputTodo, setInputTodo] = React.useState('')
-    const [disabled, setDisabled] = React.useState(true)
+    const [todoId, setTodoId] = React.useState(maxItems + 1)
+    const [showButton, setShowButton] = React.useState(true)
+    
+    React.useEffect(() => {
+        setTodoId(maxItems + 1)
+    },[maxItems])
 
-    // not sure how to make it correctly, probably good option
-    // would be to set id on back-end, so now I will hard code it,
-    // as I know, that there are 200 items
-    const [todoId, setTodoId] = React.useState(201)
-
-    const HandleSubmit = (e:React.FormEvent) => {
-        e.preventDefault()
-        // console.log(todoId)
-        async function addTodo() {
-            const response = await axios.post('https://jsonplaceholder.typicode.com/todos',
+    const addTodo = React.useCallback(async (id: number, inputTodo: string, inputId: string) => {
+        const response = await axios.post('https://jsonplaceholder.typicode.com/todos',
         {
             "userId": Number(inputId),
-            "id": todoId,
+            "id": id,
             "title": inputTodo,
             "completed": false
-        })
-
-        setItems([...items, response.data])
-        // console.log(response)
         }
-        addTodo()
-        setTodoId(prev => prev + 1)
+    )
+        setItems([...items, {...response.data, id}])
+    }, [items, setItems, maxItems])
+
+    const HandleSubmit = React.useCallback( async (e:React.FormEvent) => {
+        e.preventDefault()
+        await addTodo (todoId, inputTodo, inputId)
+        setTodoId(todoId + 1)
         setInputId('')
         setInputTodo('')
-        // console.log(todoId)
-    }
-
-    React.useEffect(() => {
-        if (inputId.trim() && inputTodo.trim()) {
-            setDisabled(false)
-        } else {setDisabled(true)}
-    }, [inputId, inputTodo])
+    }, [todoId, inputTodo, inputId, addTodo])
 
     return (
         <div className='form_wrapper'>
-            <form onSubmit={HandleSubmit}>
+            <button onClick={() => setShowButton(!showButton)} className={showButton ? 'btn_show' : 'btn_hidden'}>{showButton ? "SHOW FORM" : "HIDE FORM"}</button>
+            {!showButton && <form onSubmit={HandleSubmit}>
                 <input type="number" value={inputId} onChange={(e) => setInputId(e.target.value)} placeholder='Enter User ID'></input>
                 <input type="text" value={inputTodo} onChange={(e) => setInputTodo(e.target.value)} placeholder='Enter Todo'></input>
-                <button disabled={disabled}>SUBMIT</button>
-            </form>
+                <button disabled={!inputId.trim() || !inputTodo.trim()}>SUBMIT</button>
+            </form>}
         </div>
     )
 }
