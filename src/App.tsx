@@ -16,11 +16,19 @@ export default function App() {
   
   React.useEffect(() => {
     const getData = async () => {
-      const response = await axios.get<IItems[]>(`https://jsonplaceholder.typicode.com/todos?_limit=30&_page=${pages}`)
-      setItems([...items, ...response.data])
-      setPages(prev => prev + 1)
-      setMaxItems(Number(response.headers['x-total-count']))
+      try {
+        const response = await axios.get<IItems[]>(`https://jsonplaceholder.typicode.com/todos?_limit=30&_page=${pages}`)
+        setItems([...items, ...response.data])
+        setPages(prev => prev + 1)
+        setMaxItems(Number(response.headers['x-total-count']))
+        
+      }   catch (error:any) {
+        alert(error.message)
+        console.log(error.message)
+    }    finally {
       setLoading(false)
+      }
+      
     }
     getData();
   }, [loading])

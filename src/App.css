@@ -8,6 +8,7 @@
   margin: 20px auto;
 }
 .form_wrapper{
+  position: relative;
   display: flex;
   width: 100%;
   justify-content: center;
@@ -40,4 +41,21 @@ button {
 }
 button:hover {
   background-color: aqua;
+}
+button:disabled:hover {
+  background-color: red;
+}
+.form_sending {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: calc(50% - 150px);
+  border: 2px solid yellowgreen;
+  width: 300px;
+  height: 300px;
+  z-index: 10;
+  background-color: black;
+  color: white;
 }
